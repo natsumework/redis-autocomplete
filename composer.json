@@ -1,0 +1,52 @@
+{
+    "name": "natsumework/redis-autocomplete",
+    "description": "",
+    "keywords": [
+        "laravel",
+        "redis",
+        "autocomplete"
+    ],
+    "authors": [
+        {
+            "name": "natsumework",
+            "email": "natsumework0902@gmail.com",
+            "homepage": "https://github.com/natsumework",
+            "role": "Developer"
+        }
+    ],
+    "license": "MIT",
+    "require": {
+        "illuminate/support": "^6.0 || ^7.0 || ^8.0",
+        "illuminate/redis": "^6.0 || ^7.0 || ^8.0",
+        "illuminate/config": "^6.0 || ^7.0 || ^8.0",
+        "php": "^7.3 || ^8.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.9",
+        "phpunit/phpunit": "^8.0 || ^9.3.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Natsumework\\RedisAutocomplete\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Natsumework\\RedisAutocomplete\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "phpunit --coverage-text --coverage-clover=coverage.clover"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Natsumework\\RedisAutocomplete\\AutoCompleteServiceProvider"
+            ]
+        }
+    }
+}
