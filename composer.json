@@ -1,6 +1,6 @@
 {
     "name": "natsumework/redis-autocomplete",
-    "description": "",
+    "description": "Provide an easy way for your laravel app to use redis to speed up autocomplete queries.",
     "keywords": [
         "laravel",
         "redis",

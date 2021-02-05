@@ -7,16 +7,35 @@ use Illuminate\Support\Str;
 
 class Autocomplete
 {
+    /**
+     * @var string|null
+     */
     protected $defaultConnection;
 
+    /**
+     * @var array
+     */
     protected $connection = [];
 
+    /**
+     * @var int|null
+     */
     protected $defaultTtl;
 
+    /**
+     * @var array
+     */
     protected $ttl = [];
 
+    /**
+     * @var string
+     */
     protected $prefix;
 
+    /**
+     * Autocomplete constructor.
+     * @param $config
+     */
     public function __construct($config)
     {
         $this->defaultConnection = $config['connection'];
@@ -135,6 +154,10 @@ class Autocomplete
         $items = [];
 
         try {
+            if ($keyword === '') {
+                return $items;
+            }
+
             $keyword = Str::lower($keyword);
             $keywords = explode(' ', $keyword);
 
