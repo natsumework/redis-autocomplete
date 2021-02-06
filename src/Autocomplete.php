@@ -56,7 +56,7 @@ class Autocomplete
 
     /**
      * @param string $name
-     * @param array|\Illuminate\Support\Collection|\Illuminate\Database\Eloquent\Collection $phrase
+     * @param array|object $phrase
      */
     public function removePhrase(string $name, $phrase)
     {
@@ -153,92 +153,89 @@ class Autocomplete
     {
         $items = [];
 
-        try {
-            if ($keyword === '') {
-                return $items;
-            }
+        if ($keyword === '') {
+            return $items;
+        }
 
-            $keyword = Str::lower($keyword);
-            $keywords = explode(' ', $keyword);
+        $keyword = Str::lower($keyword);
+        $keywords = explode(' ', $keyword);
 
-            $key = $this->getKey($name);
-            $keys = [];
-            $destination = $key . ':';
-            $len = 0;
+        $key = $this->getKey($name);
+        $keys = [];
+        $destination = $key . ':';
+        $len = 0;
 
-            $connection = $this->getConnection();
+        $connection = $this->getConnection();
 
-            foreach ($keywords as $keyword) {
-                $len++;
-                $keys[] = $key . ':' . $keyword;
-                if ($len > 1) {
-                    $destination .= '|';
-                }
-                $destination .= $keyword;
-            }
-
-            $searchMore = true;
-            $count = 0;
-            $ids = [];
-
+        foreach ($keywords as $keyword) {
+            $len++;
+            $keys[] = $key . ':' . $keyword;
             if ($len > 1) {
-                // If there are multiple keywords
-                $count = Redis::connection($connection)
-                    ->zInterstore($destination, $keys);
+                $destination .= '|';
+            }
+            $destination .= $keyword;
+        }
 
-                Redis::expire($destination, 60 * 10);
+        $searchMore = true;
+        $count = 0;
+        $ids = [];
 
-                if ($count > 0) {
-                    $ids = Redis::connection($connection)
-                        ->zRevRange($destination, 0, $limit);
-                    $items = Redis::connection($connection)
-                        ->hMget($key, $ids);
-                }
+        if ($len > 1) {
+            // If there are multiple keywords
+            $count = Redis::connection($connection)
+                ->zInterstore($destination, $keys);
 
-                $searchMore = $count < $limit;
+            Redis::connection($connection)
+                ->expire($destination, 60 * 10);
+
+            if ($count > 0) {
+                $ids = Redis::connection($connection)
+                    ->zRevRange($destination, 0, $limit);
+                $items = Redis::connection($connection)
+                    ->hMget($key, $ids);
             }
 
-            if ($searchMore) {
-                // If there is only one keyword or the number of items has not reached the limit
-                $moreIds = Redis::connection($connection)
-                    ->zRevRange($key . ':' . $keywords[0], 0, $limit);
+            $searchMore = $count < $limit;
+        }
 
-                // Remove duplication and superfluous
-                $moreIdsCount = 0;
-                $insufficientCount = $limit - $count;
-                foreach ($moreIds as $index => $moreId) {
-                    if ($moreIdsCount < $insufficientCount) {
-                        if (in_array($moreId, $ids)) {
-                            unset($moreIds[$index]);
-                            continue;
-                        }
+        if ($searchMore) {
+            // If there is only one keyword or the number of items has not reached the limit
+            $moreIds = Redis::connection($connection)
+                ->zRevRange($key . ':' . $keywords[0], 0, $limit);
 
-                        $moreIdsCount++;
-                    } else {
+            // Remove duplication and superfluous
+            $moreIdsCount = 0;
+            $insufficientCount = $limit - $count;
+            foreach ($moreIds as $index => $moreId) {
+                if ($moreIdsCount < $insufficientCount) {
+                    if (in_array($moreId, $ids)) {
                         unset($moreIds[$index]);
+                        continue;
                     }
-                }
 
-                if (count($moreIds) > 0) {
-                    $moreItems = Redis::connection($connection)
-                        ->hMget($key, $moreIds);
-
-                    foreach ($moreItems as $moreItem) {
-                        $items[] = $moreItem;
-                    }
+                    $moreIdsCount++;
+                } else {
+                    unset($moreIds[$index]);
                 }
             }
 
-            foreach ($items as $index => $item) {
-                if ($item === false) {
-                    unset($items[$index]);
-                    continue;
+            if (count($moreIds) > 0) {
+                $moreItems = Redis::connection($connection)
+                    ->hMget($key, $moreIds);
+
+                foreach ($moreItems as $moreItem) {
+                    $items[] = $moreItem;
                 }
-
-                $items[$index] = unserialize($item);
             }
-        } catch (\Throwable $e) {
+        }
 
+        foreach ($items as $index => $item) {
+            if ($item === false) {
+                unset($items[$index]);
+                continue;
+            }
+
+            $items[$index] = unserialize($item);
         }
 
         return $items;
