@@ -1,7 +1,7 @@
 # Redis Autocomplete for laravel
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/natsumework/redis-autocomplete.svg?style=flat-square)](https://packagist.org/packages/natsumework/redis-autocomplete)
-![Test Status](https://img.shields.io/github/workflow/status/natsumework/redis-autocomplete/run-tests?label=tests&style=flat-square)
+![Test Status](https://img.shields.io/github/actions/workflow/status/natsumework/redis-autocomplete/test.yml?branch=main)
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](LICENSE.md)
 [![Total Downloads](https://img.shields.io/packagist/dt/natsumework/redis-autocomplete.svg?style=flat-square)](https://packagist.org/packages/natsumework/redis-autocomplete)
 
